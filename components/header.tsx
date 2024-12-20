@@ -33,7 +33,7 @@ export function Header() {
                 Sign Up
               </Button>
             </Link>
-            <Link href="/cart" className="text-white hover:text-[#F4D03F]">
+            <Link href="/checkout/shipping" className="text-white hover:text-[#F4D03F]">
               <ShoppingBag className="h-6 w-6" />
             </Link>
             <Link href="/account" className="text-white hover:text-[#F4D03F]">

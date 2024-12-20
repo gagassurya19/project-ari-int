@@ -1,10 +1,14 @@
+'use client'
+
 import Link from "next/link"
 import Image from "next/image"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { useRouter } from "next/navigation"
 
 export default function SignUpPage() {
+    const route = useRouter()
     return (
         <div className="flex min-h-screen items-center justify-center">
             <div className="flex w-full lg:w-1/2 flex-col px-8 py-12 lg:px-12">
@@ -23,7 +27,10 @@ export default function SignUpPage() {
                         Discover your signature scent today!
                     </p>
 
-                    <form className="mt-8 space-y-6">
+                    <form className="mt-8 space-y-6" onSubmit={(event) => {
+                        event.preventDefault();
+                        route.push("/thanks");
+                    }}>
                         <div className="space-y-1">
                             <Input
                                 type="text"
@@ -96,9 +103,9 @@ export default function SignUpPage() {
                     className="object-cover"
                 />
                 <div className="absolute inset-0 bg-black/10" />
-                    <h1 className="absolute right-8 top-8 text-5xl font-bold text-white">
-                        Versatile
-                    </h1>
+                <h1 className="absolute right-8 top-8 text-5xl font-bold text-white">
+                    Versatile
+                </h1>
             </div>
 
         </div>
