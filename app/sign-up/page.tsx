@@ -102,11 +102,11 @@ export default function SignUpPage() {
                     fill
                     className="object-cover"
                 />
-                <div className="absolute inset-0 bg-black/10 flex items-start justify-center pt-16">
+                {/* <div className="absolute inset-0 bg-black/10 flex items-start justify-center pt-16">
                     <h1 className="text-9xl font-croissant text-white">
                         Versatile
                     </h1>
-                </div>
+                </div> */}
             </div>
 
         </div>

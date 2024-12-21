@@ -53,7 +53,7 @@ export default function PaymentPage() {
                 <Link href="/checkout/delivery">Back</Link>
               </Button>
               <Button asChild className="bg-[#0A1172] hover:bg-[#0A1172]/90">
-                <Link href="/checkout/success">Pay $164.23</Link>
+                <Link href="/checkout/success">Pay</Link>
               </Button>
             </div>
           </div>
