@@ -3,7 +3,7 @@ import { ShoppingBag, User, Search } from 'lucide-react'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
-export function Header() {
+export function HeaderWithSearch() {
     return (
         <header className="bg-navy text-black border-b-2">
             <div className="container mx-auto px-4">
@@ -23,12 +23,36 @@ export function Header() {
                                 Sign Up
                             </Button>
                         </Link>
-                        <Link href="/checkout/shipping" className="text-cream hover:text-cream/80">
+                    </div>
+                </div>
+            </div>
+            <div className="bg-white">
+                <div className="container mx-auto px-4">
+                    <div className="flex h-16 items-center justify-between">
+                        <div></div>
+                        
+                        <div className="flex-1 mx-12 max-w-3xl">
+                            <div className="relative">
+                                <Input
+                                    type="search"
+                                    placeholder="Search product"
+                                    className="w-full bg-white text-black pl-10"
+                                />
+                                <Search
+                                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                                    size={20} // Ubah ukuran sesuai kebutuhan
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-8">
+                            <Link href="/checkout/shipping" className="text-navy hover:text-navy/80">
                                 <ShoppingBag className="h-6 w-6" />
                             </Link>
-                            <Link href="/account" className="text-cream hover:text-cream/80">
+                            <Link href="/account" className="text-navy hover:text-navy/80">
                                 <User className="h-6 w-6" />
                             </Link>
+                        </div>
                     </div>
                 </div>
             </div>

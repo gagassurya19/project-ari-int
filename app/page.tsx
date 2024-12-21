@@ -1,7 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Header } from "@/components/header"
+import { HeaderWithSearch } from "@/components/header-with-serach"
 
 const products = [
   {
@@ -51,7 +51,7 @@ const products = [
 export default function ProductsPage() {
   return (
     <div className="min-h-screen bg-white">
-      <Header />
+      <HeaderWithSearch />
 
       <div className="relative w-full h-auto bg-[#0A1172]">
         <Image
