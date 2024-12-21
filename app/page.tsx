@@ -52,42 +52,22 @@ export default function ProductsPage() {
   return (
     <div className="min-h-screen bg-white">
       <Header />
-      
-      <div className="relative h-[400px] bg-[#0A1172]">
-  <Image
-    src="/product/banner.png"
-    alt="Flower Blossom"
-    fill
-    className="object-cover opacity-80"
-  />
-  <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center">
-    <h1 className="text-6xl font-serif mb-4 relative">
-      <span className="bg-black/50 px-4 py-1 rounded-md">
-        FLOWER BLOSSOM
-      </span>
-    </h1>
-    <p className="text-xl max-w-2xl relative">
-      <span className="bg-black/50 px-3 py-1 rounded-md">
-        Step into a world where the essence of spring blooms awaits, ready to captivate your senses.
-      </span>
-    </p>
-  </div>
-</div>
 
+      <div className="relative w-full h-auto bg-[#0A1172]">
+        <Image
+          src="/product/banner.png"
+          alt="Flower Blossom"
+          width={1920}
+          height={1080}
+          className="w-full h-auto object-cover"
+        />
+      </div>
 
       <div className="container mx-auto px-4 py-12">
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">Filter By</h2>
-          <div className="flex gap-4">
-            <Button variant="outline">Men fragrance</Button>
-            <Button variant="outline">Women fragrance</Button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {products.map((product) => (
-            <Link 
-              key={product.id} 
+            <Link
+              key={product.id}
               href={`/products/${product.id}`}
               className="group"
             >
@@ -108,9 +88,11 @@ export default function ProductsPage() {
           ))}
         </div>
 
-        <div className="mt-12 text-center text-gray-600">
-          Explore our iconic fragrances, in an array of scents from fresh and flirty to sensual and seductive. 
-          Our signature fragrances are perfect for gift-giving – for yourself or for her.
+      </div>
+      <div className="w-full h-[200px] mt-12 text-left text-black font-semibold bg-[#D9D9D9] flex items-center">
+        <div className="container m-5 lg:m-52 text-xl">
+          Explore our iconic fragrances, in an array of scents from fresh and flirty to sensual and seductive. Our signature fragrances are 
+          perfect for gift-giving – for yourself or for her.
         </div>
       </div>
     </div>

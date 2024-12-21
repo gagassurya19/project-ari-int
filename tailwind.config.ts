@@ -9,7 +9,12 @@ export default {
   ],
   theme: {
   	extend: {
+		fontFamily: {
+			croissant: ['"Croissant One"', 'serif'],
+		},
   		colors: {
+			navy: '#001C55',
+			cream: '#FFE3AA',
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {
