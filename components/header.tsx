@@ -23,7 +23,7 @@ export function Header() {
                                 Sign Up
                             </Button>
                         </Link>
-                        <Link href="/checkout/shipping" className="text-cream hover:text-cream/80">
+                        <Link href="/cart" className="text-cream hover:text-cream/80">
                                 <ShoppingBag className="h-6 w-6" />
                             </Link>
                             <Link href="/account" className="text-cream hover:text-cream/80">

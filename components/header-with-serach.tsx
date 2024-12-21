@@ -46,7 +46,7 @@ export function HeaderWithSearch() {
                         </div>
 
                         <div className="flex items-center gap-8">
-                            <Link href="/checkout/shipping" className="text-navy hover:text-navy/80">
+                            <Link href="/cart" className="text-navy hover:text-navy/80">
                                 <ShoppingBag className="h-6 w-6" />
                             </Link>
                             <Link href="/account" className="text-navy hover:text-navy/80">

@@ -15,7 +15,7 @@ export default function ShippingPage() {
         <div className="mb-8">
           <Link href="/" className="flex items-center gap-2 text-gray-600">
             <ArrowLeft className="h-4 w-4" />
-            <span className="text-xl font-serif">Versatile</span>
+            <span className="text-xl font-croissant">Versatile</span>
           </Link>
         </div>
 
@@ -23,7 +23,7 @@ export default function ShippingPage() {
 
         <div className="mt-12 grid gap-12 lg:grid-cols-2">
           <div className="order-2 lg:order-1">
-            <OrderSummary showQuantityControls={false} />
+            <OrderSummary/>
           </div>
 
           <div className="order-1 lg:order-2 space-y-8">

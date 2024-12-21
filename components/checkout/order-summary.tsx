@@ -1,86 +1,93 @@
+import { useState } from "react"
 import Image from "next/image"
-import { Minus, Plus, Trash2 } from 'lucide-react'
+import { Minus, Plus, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 
-interface OrderSummaryProps {
-  showQuantityControls?: boolean
+interface Item {
+  id: number
+  name: string
+  price: number
+  quantity: number
+  image: string
 }
 
-export function OrderSummary({ showQuantityControls = true }: OrderSummaryProps) {
+export function OrderSummary() {
+  const [items, setItems] = useState<Item[]>([
+    { id: 1, name: "TOM FORD", price: 2550000, quantity: 1, image: "/product/tom-ford-noir.png" },
+    { id: 2, name: "CREED", price: 9850000, quantity: 1, image: "/product/creed-white.png" },
+  ])
+
+  const updateQuantity = (id: number, increment: boolean) => {
+    setItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              quantity: increment ? item.quantity + 1 : Math.max(1, item.quantity - 1),
+            }
+          : item
+      )
+    )
+  }
+
+  const removeItem = (id: number) => {
+    setItems((prevItems) => prevItems.filter((item) => item.id !== id))
+  }
+
+  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  const tax = subtotal * 0.065
+  const total = subtotal + tax
+
   return (
     <div className="space-y-6">
       <h2 className="text-lg font-semibold">Order Summary</h2>
-      
-      <div className="space-y-4">
-        <div className="flex gap-4">
-          <Image
-            src="/product/tom-ford-noir.png"
-            alt="TOM FORD"
-            width={80}
-            height={80}
-            className="object-cover"
-          />
-          <div className="flex-1">
-            <div className="flex justify-between">
-              <div>
-                <h3 className="font-medium">TOM FORD</h3>
-                <p className="text-sm text-gray-600">Rp 2.550.000 IDR</p>
-              </div>
-              {showQuantityControls ? (
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="icon">
-                    <Minus className="h-4 w-4" />
-                  </Button>
-                  <span className="w-8 text-center">1</span>
-                  <Button variant="outline" size="icon">
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <span>1</span>
-                  <Trash2 className="h-4 w-4 text-gray-400" />
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
 
-        <div className="flex gap-4">
-          <Image
-            src="/product/creed-white.png"
-            alt="CREED"
-            width={80}
-            height={80}
-            className="object-cover"
-          />
-          <div className="flex-1">
-            <div className="flex justify-between">
-              <div>
-                <h3 className="font-medium">CREED</h3>
-                <p className="text-sm text-gray-600">Rp 9.850.000 IDR</p>
+      <div className="space-y-4">
+        {items.map((item) => (
+          <div key={item.id} className="flex gap-4">
+            <Image
+              src={item.image}
+              alt={item.name}
+              width={80}
+              height={80}
+              className="object-cover"
+            />
+            <div className="flex-1">
+              <div className="flex justify-between">
+                <div>
+                  <h3 className="font-medium">{item.name}</h3>
+                  <p className="text-sm text-gray-600">Rp {item.price.toLocaleString()} IDR</p>
+                </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => updateQuantity(item.id, false)}
+                    >
+                      <Minus className="h-4 w-4" />
+                    </Button>
+                    <span className="w-8 text-center">{item.quantity}</span>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => updateQuantity(item.id, true)}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => removeItem(item.id)}
+                    >
+                      <Trash2 className="h-4 w-4 text-black" />
+                    </Button>
+                  </div>
               </div>
-              {showQuantityControls ? (
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="icon">
-                    <Minus className="h-4 w-4" />
-                  </Button>
-                  <span className="w-8 text-center">1</span>
-                  <Button variant="outline" size="icon">
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <span>1</span>
-                  <Trash2 className="h-4 w-4 text-gray-400" />
-                </div>
-              )}
             </div>
           </div>
-        </div>
+        ))}
       </div>
 
       <div className="flex gap-4">
@@ -93,11 +100,11 @@ export function OrderSummary({ showQuantityControls = true }: OrderSummaryProps)
       <div className="space-y-2">
         <div className="flex justify-between">
           <span className="text-gray-600">Subtotal</span>
-          <span>Rp 12.400.000 IDR</span>
+          <span>Rp {subtotal.toLocaleString()} IDR</span>
         </div>
         <div className="flex justify-between">
           <span className="text-gray-600">Sales tax (6.5%)</span>
-          <span>Rp 50.000 IDR</span>
+          <span>Rp {tax.toLocaleString()} IDR</span>
         </div>
         <div className="flex justify-between">
           <span className="text-gray-600">Shipping Fee</span>
@@ -106,10 +113,9 @@ export function OrderSummary({ showQuantityControls = true }: OrderSummaryProps)
         <Separator />
         <div className="flex justify-between font-medium">
           <span>Total due</span>
-          <span>Rp 12.450.000 IDR</span>
+          <span>Rp {total.toLocaleString()} IDR</span>
         </div>
       </div>
     </div>
   )
 }
-

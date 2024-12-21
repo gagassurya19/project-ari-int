@@ -15,14 +15,14 @@ export default function DeliveryPage() {
         <div className="mb-8">
           <Link href="/" className="flex items-center gap-2 text-gray-600">
             <ArrowLeft className="h-4 w-4" />
-            <span className="text-xl font-serif">Versatile</span>
+            <span className="text-xl font-croissant">Versatile</span>
           </Link>
         </div>
 
         <ProgressSteps currentStep="delivery" />
 
         <div className="mt-12 grid gap-12 lg:grid-cols-2">
-          <OrderSummary showQuantityControls={false} />
+          <OrderSummary/>
 
           <div className="space-y-8">
             <div className="space-y-4">
