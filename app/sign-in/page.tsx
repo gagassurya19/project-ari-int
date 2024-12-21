@@ -20,7 +20,7 @@ export default function SignInPage() {
                 <div className="mx-auto w-full max-w-md">
                     <h1 className="text-4xl font-bold">Sign In</h1>
                     <p className="mt-4 text-xl text-gray-600">
-                    Hello again! Immerse yourself in the world of luxury scents
+                        Hello again! Immerse yourself in the world of luxury scents
                     </p>
 
                     <form className="mt-8 space-y-6">
@@ -65,7 +65,7 @@ export default function SignInPage() {
                     <p className="mt-6 text-center text-sm text-gray-600">
                         Don't have an account?{" "}
                         <Link href="/sign-up" className="text-navy-blue underline">
-                            Sign up 
+                            Sign up
                         </Link>
                         {" "}now
                     </p>
@@ -88,10 +88,11 @@ export default function SignInPage() {
                     fill
                     className="object-cover"
                 />
-                <div className="absolute inset-0 bg-black/10" />
-                    <h1 className="absolute right-8 top-8 text-5xl font-bold text-white">
+                <div className="absolute inset-0 bg-black/10 flex items-start justify-center pt-16">
+                    <h1 className="text-9xl font-croissant text-white">
                         Versatile
                     </h1>
+                </div>
             </div>
 
         </div>
