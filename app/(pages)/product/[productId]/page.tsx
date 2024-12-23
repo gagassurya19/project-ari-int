@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Image from "next/image";
 import { Minus, Plus, Star } from 'lucide-react';
 import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { getProductDetail } from "@/lib/api/product";
+import { addToCart } from "@/lib/api/cart";
 
 export default function ProductDetail() {
   const { productId } = useParams(); // Get productId from URL
@@ -15,6 +15,7 @@ export default function ProductDetail() {
   const [quantity, setQuantity] = useState(1);
   const [mainImage, setMainImage] = useState<string | null>(null);
   const [images, setImages] = useState<string[]>([]);
+  const userId = 1; // Replace with dynamic userId if available
 
   useEffect(() => {
     if (productId) {
@@ -39,6 +40,18 @@ export default function ProductDetail() {
 
   const handleGalleryClick = (image: string) => {
     setMainImage(image); // Change the main image when a gallery image is clicked
+  };
+
+  const handleAddToCart = async () => {
+    try {
+      const response = await addToCart(userId, Number(productId), quantity);
+      console.log('Item added to cart:', response);
+
+      // Redirect to shipping page after successful addition
+      router.push('/cart');
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+    }
   };
 
   if (!product) {
@@ -124,9 +137,9 @@ export default function ProductDetail() {
 
             <Button
               className="w-full bg-[#0A1172] hover:bg-[#0A1172]/90 text-white"
-              onClick={() => router.push("/checkout/shipping")}
+              onClick={handleAddToCart}
             >
-              Continue
+              Add to Cart & Continue
             </Button>
 
             <div>

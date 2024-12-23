@@ -24,7 +24,7 @@ export const addToCart = async (userId: number, productId: number, quantity: num
 };
 
 export const updateCartItem = async (cartItemId: number, quantity: number) => {
-  const res = await fetch(`${API_URL}/item`, {
+  const res = await fetch(`${API_URL}`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -38,7 +38,7 @@ export const updateCartItem = async (cartItemId: number, quantity: number) => {
 };
 
 export const removeFromCart = async (cartItemId: number) => {
-  const res = await fetch(`${API_URL}/item`, {
+  const res = await fetch(`${API_URL}`, {
     method: 'DELETE',
     body: JSON.stringify({ cartItemId })
   });
