@@ -1,0 +1,114 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int        @id @default(autoincrement())
+  username  String     @unique
+  password  String
+  createdAt DateTime   @default(now())
+  carts     Cart[]     // Relation to Cart
+  transactions Transaction[] // Relation to Transaction
+}
+
+model Product {
+  id          Int        @id @default(autoincrement())
+  brand       String
+  name        String
+  price       Decimal
+  rating      Float
+  image       String
+  description String
+  gallery     Gallery[]  // Relation to Gallery
+  cartItems   CartItem[] // Relation to CartItem
+  createdAt   DateTime   @default(now())
+}
+
+model Gallery {
+  id        Int      @id @default(autoincrement())
+  imageUrl  String
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model Cart {
+  id         Int        @id @default(autoincrement())
+  userId     Int        @unique // Foreign key to User
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items      CartItem[] // Relation to CartItem
+  transactions Transaction[] // Relation to Transaction
+  createdAt  DateTime   @default(now())
+}
+
+model CartItem {
+  id        Int      @id @default(autoincrement())
+  quantity  Int      @default(1)
+  cartId    Int
+  productId Int
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model Transaction {
+  id               Int           @id @default(autoincrement())
+  userId           Int           // Foreign key to User
+  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cartId           Int           // Foreign key to Cart
+  cart             Cart          @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  shippingAddress  Shipping      @relation(fields: [shippingId], references: [id])
+  shippingId       Int
+  deliveryOption   Delivery      @relation(fields: [deliveryId], references: [id])
+  deliveryId       Int
+  paymentMethod    Payment       @relation(fields: [paymentId], references: [id])
+  paymentId        Int
+  status           String        @default("Pending") // Pending, Completed, Canceled
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+}
+
+model Shipping {
+  id             Int           @id @default(autoincrement())
+  firstName      String
+  lastName       String
+  email          String
+  phone          String
+  addressLine1   String
+  addressLine2   String?
+  city           String
+  state          String
+  postalCode     String
+  landmark       String?
+  isBillingSame  Boolean
+  transactions   Transaction[] // Relation to Transaction
+}
+
+model Delivery {
+  id            Int           @id @default(autoincrement())
+  type          String        // Standard, Express
+  estimatedDays Int
+  cost          Float
+  transactions  Transaction[] // Relation to Transaction
+}
+
+model Payment {
+  id            Int           @id @default(autoincrement())
+  method        String        // CreditCard, PayPal, etc.
+  cardNumber    String?       // Required only for CreditCard
+  expiry        String?       // MM/YY
+  cvv           String?       // Card verification value
+  status        String        @default("Pending") // Pending, Success, Failed
+  transactions  Transaction[] // Relation to Transaction
+}
