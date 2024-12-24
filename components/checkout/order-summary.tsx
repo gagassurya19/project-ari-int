@@ -1,13 +1,20 @@
 import { useEffect, useState } from "react"
 import Image from "next/image"
-import { Minus, Plus, Trash2 } from "lucide-react"
+import { Home, Minus, Plus, ShoppingCart, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { getUserFromLocalStorage } from "@/lib/authenticate"
 import { getCart, removeFromCart, updateCartItem } from "@/lib/api/cart"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
 
-export function OrderSummary() {
+interface OrderSummaryProps {
+  delivery?: number;  // Optional prop
+}
+
+export function OrderSummary({ delivery = 0 }: OrderSummaryProps) {
+  const route = useRouter()
   const [cartItems, setCartItems] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true)
 
@@ -18,7 +25,32 @@ export function OrderSummary() {
               const user = getUserFromLocalStorage();
               if (!user.id) throw new Error("User ID is missing");
               const userId = user.id;
-              const cartData = await getCart(userId)
+              const cartId = localStorage.getItem("cart_id")
+
+                if(!cartId){
+                    return (
+                        <div className="flex items-center justify-center h-screen w-full">
+                            <div className="text-center max-w-md mx-auto">
+                                <h1 className="text-2xl font-bold">Keranjang Belanja Kosong</h1>
+                                <div className="flex flex-col items-center space-y-4 mt-4">
+                                    <ShoppingCart className="w-24 h-24 text-muted-foreground" />
+                                    <p className="text-center text-muted-foreground">
+                                        Keranjang belanja Anda masih kosong. Mulailah berbelanja untuk menambahkan produk.
+                                    </p>
+                                </div>
+                                <div className="flex justify-center mt-4">
+                                    <Button asChild>
+                                        <Link href="/" className="flex items-center space-x-2">
+                                            <Home className="w-4 h-4" />
+                                            <span>Kembali ke Beranda</span>
+                                        </Link>
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                }
+              const cartData = await getCart(userId, cartId)
               // Ensure cartData is an array before setting it to state
               if (Array.isArray(cartData.items)) {
                   setCartItems(cartData.items)
@@ -70,9 +102,10 @@ export function OrderSummary() {
   const subtotal = cartItems.length > 0
       ? cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0)
       : 0;
-  const shipping = subtotal == 0 ? 0 : 15000
+  const shipping = subtotal == 0 ? 0 : delivery
   const tax = subtotal == 0 ? 0 : subtotal * 0.065
   const total = subtotal + shipping + tax
+  localStorage.setItem("total_cart", total)
   
   if (loading) {
       return <div>Loading...</div>
@@ -146,7 +179,11 @@ export function OrderSummary() {
         </div>
         <div className="flex justify-between">
           <span className="text-gray-600">Shipping Fee</span>
-          <span className="text-green-500">FREE</span>
+          {delivery == 0 ? (
+            <span className="text-green-500">FREE</span>
+          ) : (
+            <span className="text-green-500">{delivery}</span>
+          )}
         </div>
         <Separator />
         <div className="flex justify-between font-medium">

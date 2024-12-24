@@ -45,7 +45,7 @@ model Gallery {
 
 model Cart {
   id         Int        @id @default(autoincrement())
-  userId     Int        @unique // Foreign key to User
+  userId     Int        // Foreign key to User
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   items      CartItem[] // Relation to CartItem
   transactions Transaction[] // Relation to Transaction

@@ -1,8 +1,9 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { Header } from "@/components/header";
-import { getTransactions } from "@/lib/api/transaction";  
-import { getUserFromLocalStorage, useAuthGuard } from '@/lib/authenticate';
+import { getTransactions } from "@/lib/api/transaction";
+import { useAuthGuard } from '@/lib/authenticate';
+import { Clock, CreditCard, MapPin, Package, ShoppingBag, User } from 'lucide-react';
 
 export default function AccountPage() {
   const [userFromStorage, setUserFromStorage] = useState<any | null>(null);
@@ -13,18 +14,12 @@ export default function AccountPage() {
   useAuthGuard();
 
   useEffect(() => {
-    // Make sure that localStorage is only accessed in the client-side
-    if (typeof window !== "undefined") {
-      const storedUser = getUserFromLocalStorage();
-      if (storedUser) {
-        setUserFromStorage(storedUser);
-      }
-    }
-  }, []);
+    const user = localStorage.getItem("user") || "";
+    const storedUser = JSON.parse(user);
+    setUserFromStorage(storedUser)
 
-  useEffect(() => {
-    if (userFromStorage?.userId) {
-      getTransactions(userFromStorage.userId)
+    if (storedUser?.id) {
+      getTransactions(storedUser.id)
         .then(data => {
           setTransactions(data);
           setLoading(false);
@@ -37,9 +32,9 @@ export default function AccountPage() {
       setError('Tidak ada transaksi');
       setLoading(false);
     }
-  }, [userFromStorage]);
+  }, [])
 
-  if (!userFromStorage) {
+  if (loading) {
     return <div>Loading...</div>;  // Add a loading state for when userFromStorage is not available yet
   }
 
@@ -72,67 +67,117 @@ export default function AccountPage() {
           </div>
         </div>
 
-        {/* Order History */}
-        <div className="mt-12">
-          <h3 className="text-2xl font-bold text-[#0A1172]">Order History</h3>
-          <div className="mt-6 bg-white p-6 shadow-md rounded-md">
-            {loading && <p className="text-gray-600">Loading transactions...</p>}
-            {error && <p className="text-red-500">{error}</p>}
-            {transactions.length === 0 && !loading && !error && (
+        {/* history */}
+        <div className=" mx-auto px-4 mt-12">
+          <h3 className="text-3xl font-bold text-blue-900 mb-6">
+            Order History
+          </h3>
+
+          {transactions.length === 0 ? (
+            <div className="bg-gray-50 p-8 rounded-lg text-center">
+              <Package className="mx-auto h-12 w-12 text-gray-400 mb-3" />
               <p className="text-gray-600">No orders yet.</p>
-            )}
-            {transactions.length > 0 && !loading && !error && (
-              <div>
-                {transactions.map((transaction) => (
-                  <div key={transaction.id} className="mb-4">
-                    <h4 className="text-lg font-bold text-gray-800">Transaction ID: {transaction.id}</h4>
-                    <p className="text-gray-600">Status: {transaction.status}</p>
-                    <p className="text-gray-600">Created At: {transaction.createdAt}</p>
-
-                    {/* User Details */}
-                    <div className="mt-2">
-                      <h5 className="font-semibold">User:</h5>
-                      <p className="text-gray-600">Username: {transaction.user.username}</p>
-                      <p className="text-gray-600">Email: {transaction.user.email}</p>
-                    </div>
-
-                    {/* Cart Details */}
-                    <div className="mt-2">
-                      <h5 className="font-semibold">Cart:</h5>
-                      <p className="text-gray-600">Cart ID: {transaction.cart.id}</p>
-                      <p className="text-gray-600">Total Items: {transaction.cart.items.length}</p>
-                    </div>
-
-                    {/* Shipping Address */}
-                    <div className="mt-2">
-                      <h5 className="font-semibold">Shipping Address:</h5>
-                      <p className="text-gray-600">Name: {transaction.shippingAddress.firstName} {transaction.shippingAddress.lastName}</p>
-                      <p className="text-gray-600">Address: {transaction.shippingAddress.addressLine1}, {transaction.shippingAddress.city}, {transaction.shippingAddress.state}</p>
-                      <p className="text-gray-600">Phone: {transaction.shippingAddress.phone}</p>
-                    </div>
-
-                    {/* Delivery Option */}
-                    <div className="mt-2">
-                      <h5 className="font-semibold">Delivery Option:</h5>
-                      <p className="text-gray-600">Type: {transaction.deliveryOption.type}</p>
-                      <p className="text-gray-600">Estimated Days: {transaction.deliveryOption.estimatedDays}</p>
-                      <p className="text-gray-600">Cost: {transaction.deliveryOption.cost}</p>
-                    </div>
-
-                    {/* Payment Method */}
-                    <div className="mt-2">
-                      <h5 className="font-semibold">Payment Method:</h5>
-                      <p className="text-gray-600">Method: {transaction.paymentMethod.method}</p>
-                      {transaction.paymentMethod.cardNumber && (
-                        <p className="text-gray-600">Card Number: **** **** **** {transaction.paymentMethod.cardNumber.slice(-4)}</p>
-                      )}
-                      <p className="text-gray-600">Status: {transaction.paymentMethod.status}</p>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {transactions.map((transaction) => (
+                <div key={transaction.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                  <div className="bg-blue-50 p-4 border-b">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="text-sm text-gray-500">Transaction ID</p>
+                        <p className="font-medium text-blue-900">{transaction.id}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-gray-500">Date</p>
+                        <p className="font-medium text-blue-900">{transaction.createdAt}</p>
+                      </div>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
+
+                  <div className="p-6 space-y-6">
+                    {/* Products */}
+                    <div className="flex items-start gap-4">
+                      <ShoppingBag className="h-5 w-5 text-blue-600 mt-1 flex-shrink-0" />
+                      <div className="w-full">
+                        <h4 className="font-medium text-gray-900 mb-4">Products</h4>
+                        <div className="grid gap-4">
+                          {transaction.cart.items.map((item: any) => (
+                            <div key={item.id} className="flex gap-4 p-4 bg-gray-50 rounded-lg">
+                              <img
+                                src={item.product.image}
+                                alt={item.product.name}
+                                className="w-20 h-20 object-cover rounded-md"
+                              />
+                              <div>
+                                <p className="font-medium text-gray-900">{item.product.brand}</p>
+                                <p className="text-gray-600">{item.product.name}</p>
+                                <p className="text-gray-600">Quantity: {item.quantity}</p>
+                                <p className="font-medium text-blue-600">
+                                  {item.product.price * item.quantity}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* User Info */}
+                    <div className="flex items-start gap-4">
+                      <User className="h-5 w-5 text-blue-600 mt-1" />
+                      <div>
+                        <h4 className="font-medium text-gray-900 mb-2">Customer Details</h4>
+                        <p className="text-gray-600">{transaction.user.username}</p>
+                      </div>
+                    </div>
+
+                    {/* Shipping Info */}
+                    <div className="flex items-start gap-4">
+                      <MapPin className="h-5 w-5 text-blue-600 mt-1" />
+                      <div>
+                        <h4 className="font-medium text-gray-900 mb-2">Shipping Address</h4>
+                        <p className="text-gray-600">
+                          {transaction.shippingAddress.firstName} {transaction.shippingAddress.lastName}
+                        </p>
+                        <p className="text-gray-600">
+                          {transaction.shippingAddress.addressLine1}, {transaction.shippingAddress.city}
+                        </p>
+                        <p className="text-gray-600">{transaction.shippingAddress.phone}</p>
+                      </div>
+                    </div>
+
+                    {/* Delivery Info */}
+                    <div className="flex items-start gap-4">
+                      <Clock className="h-5 w-5 text-blue-600 mt-1" />
+                      <div>
+                        <h4 className="font-medium text-gray-900 mb-2">Delivery Details</h4>
+                        <p className="text-gray-600">
+                          {transaction.deliveryOption.type} ({transaction.deliveryOption.estimatedDays} days)
+                        </p>
+                        <p className="text-gray-600">Cost: {transaction.deliveryOption.cost}</p>
+                      </div>
+                    </div>
+
+                    {/* Payment Info */}
+                    <div className="flex items-start gap-4">
+                      <CreditCard className="h-5 w-5 text-blue-600 mt-1" />
+                      <div>
+                        <h4 className="font-medium text-gray-900 mb-2">Payment Method</h4>
+                        <p className="text-gray-600">{transaction.paymentMethod.method}</p>
+                        {transaction.paymentMethod.cardNumber && (
+                          <p className="text-gray-600">
+                            Card: **** {transaction.paymentMethod.cardNumber.slice(-4)}
+                          </p>
+                        )}
+                        <p className="text-gray-600">Status: {transaction.paymentMethod.status}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

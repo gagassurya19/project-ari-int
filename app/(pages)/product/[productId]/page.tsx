@@ -1,3 +1,4 @@
+// @app/(pages)/product/[productId]
 'use client';
 
 import { useEffect, useState } from "react";
@@ -6,7 +7,7 @@ import { Minus, Plus, Star } from 'lucide-react';
 import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { getProductDetail } from "@/lib/api/product";
-import { addToCart } from "@/lib/api/cart";
+import { createCart, addToCart } from "@/lib/api/cart";
 import { getUserFromLocalStorage } from "@/lib/authenticate";
 
 export default function ProductDetail() {
@@ -47,15 +48,27 @@ export default function ProductDetail() {
       const user = getUserFromLocalStorage();
       if (!user.id) throw new Error("User ID is missing");
       const userId = user.id;
-      const response = await addToCart(userId, Number(productId), quantity);
-      console.log('Item added to cart:', response);
-
-      // Redirect to shipping page after successful addition
+  
+      // Check if cart_id exists in localStorage
+      let cartId = localStorage.getItem("cart_id");
+  
+      if (!cartId) {
+        // If no cart_id, create a new cart
+        const createCartResponse = await createCart(userId, Number(productId), quantity); // Assuming createCart is a function that creates a cart
+        cartId = createCartResponse.id; // Get the cartId from the response
+        localStorage.setItem("cart_id", cartId || ""); // Store cartId in localStorage
+      } else {
+        // Add the item to the cart using the cartId
+        const response = await addToCart(userId, Number(productId), quantity, parseInt(cartId || "0"));  
+      }
+  
+      // Redirect to cart page after successful addition
       router.push('/cart');
     } catch (error) {
       console.error('Error adding to cart:', error);
     }
   };
+  
 
   if (!product) {
     return <p>Loading...</p>;

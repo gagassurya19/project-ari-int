@@ -30,7 +30,6 @@ export default function SignUpPage() {
         try {
             // Call the signUp API function
             const response = await signUp(username, password)
-            console.log("User signed up:", response)
 
             // Redirect to the thank you page after successful sign-up
             route.push("/thanks")

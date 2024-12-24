@@ -12,6 +12,10 @@ export const getPaymentMethods = async () => {
 };
 
 export const createPaymentMethod = async (paymentData: any) => {
+  if (!paymentData) {
+    throw new Error('Payment data is required');
+  }
+
   const res = await fetch(API_URL, {
     method: 'POST',
     headers: {
@@ -19,9 +23,11 @@ export const createPaymentMethod = async (paymentData: any) => {
     },
     body: JSON.stringify(paymentData),
   });
+
   if (!res.ok) {
     throw new Error('Failed to create payment method');
   }
+
   return res.json();
 };
 

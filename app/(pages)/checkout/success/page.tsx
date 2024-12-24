@@ -3,9 +3,26 @@ import { Check } from 'lucide-react'
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { useAuthGuard } from '@/lib/authenticate'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 export default function SuccessPage() {
+  const router = useRouter()
+  const [totalCart, setTotalCart] = useState<string | null>(null)
+  
   useAuthGuard();
+
+  useEffect(() => {
+    // Only run on the client side (browser)
+    const cartTotal = localStorage.getItem("total_cart");
+    setTotalCart(cartTotal);
+  }, []);
+
+  const handleBack = () => {
+    router.push("/")
+    localStorage.removeItem("total_cart")
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg text-center">
@@ -17,14 +34,13 @@ export default function SuccessPage() {
         <p className="text-gray-600 mb-6">Thank you for Shopping</p>
         
         <div className="text-3xl font-bold mb-8">
-          IDR 1,000,000
+          IDR {totalCart || 0} {/* Fallback to 0 if totalCart is null */}
         </div>
 
-        <Button asChild className="bg-[#0A1172] hover:bg-[#0A1172]/90 w-full">
-          <Link href="/">Back to Home</Link>
+        <Button className="bg-[#0A1172] hover:bg-[#0A1172]/90 w-full" onClick={handleBack}>
+          Back to Home
         </Button>
       </div>
     </div>
   )
 }
-

@@ -36,7 +36,6 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    console.log('Request Body:', body);
 
     const { brand, name, price, rating, image, description, galleryImages } = body;
     if (!brand || !name || !price || !rating || !image || !description || !galleryImages) {

@@ -1,3 +1,4 @@
+// app/api/transaction/payment
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
@@ -13,8 +14,17 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const paymentData = await req.json();
-    const payment = await prisma.payment.create({ data: paymentData });
+    // Check if the body is empty
+    const body = await req.json();
+    if (!body || Object.keys(body).length === 0) {
+      return NextResponse.json(
+        { error: 'Payment data is required' },
+        { status: 400 }
+      );
+    }
+
+    // Proceed with the payment creation if the body is valid
+    const payment = await prisma.payment.create({ data: body });
     return NextResponse.json(payment);
   } catch (error) {
     console.error('POST Payment Error:', error);

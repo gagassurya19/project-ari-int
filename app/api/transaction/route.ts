@@ -15,7 +15,15 @@ export async function GET(req: Request) {
       },
       include: {
         user: true,
-        cart: { include: { items: true } },
+        cart: {
+          include: {
+            items: {
+              include: {
+                product: true, // Menyertakan detail produk
+              },
+            },
+          },
+        },
         shippingAddress: true,
         deliveryOption: true,
         paymentMethod: true,
@@ -28,7 +36,6 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'Failed to fetch transactions.' }, { status: 500 });
   }
 }
-
 
 export async function POST(req: Request) {
   try {

@@ -5,17 +5,23 @@ import prisma from '@/lib/prisma';
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const userId = searchParams.get('userId');
+  const cartId = searchParams.get('cartId');
 
-  if (!userId) {
+  if (!userId && !cartId) {
     return NextResponse.json(
-      { error: 'userId is required' },
+      { error: 'userId or cartId is required' },
       { status: 400 }
     );
   }
 
   try {
+    // Convert cartId to number if it's provided
+    const cartFilter: any = cartId
+      ? { id: Number(cartId) }  // Ensure cartId is a number
+      : { userId: Number(userId) };
+
     const cart = await prisma.cart.findFirst({
-      where: { userId: Number(userId) },
+      where: cartFilter,
       include: {
         items: {
           include: {
@@ -42,9 +48,10 @@ export async function GET(req: Request) {
   }
 }
 
+
 // POST: Add a product to the cart
 export async function POST(req: Request) {
-  const { userId, productId, quantity } = await req.json();
+  const { userId, productId, quantity, cartId } = await req.json(); // Accept cartId from the request
 
   if (!userId || !productId || !quantity) {
     return NextResponse.json(
@@ -54,12 +61,16 @@ export async function POST(req: Request) {
   }
 
   try {
-    // Check if the cart exists
-    let cart = await prisma.cart.findFirst({
-      where: { userId: Number(userId) },
-    });
+    let cart;
 
-    // Create a cart if it doesn't exist
+    if (cartId) {
+      // If cartId is provided, find the cart by cartId
+      cart = await prisma.cart.findUnique({
+        where: { id: Number(cartId) },
+      });
+    }
+
+    // Create a new cart if none exists
     if (!cart) {
       cart = await prisma.cart.create({
         data: {
@@ -88,7 +99,7 @@ export async function POST(req: Request) {
       return NextResponse.json(updatedItem);
     }
 
-    // Add a new item to the cart
+    // Add a new item to the cart if it doesn't exist
     const newItem = await prisma.cartItem.create({
       data: {
         cartId: cart.id,
@@ -97,7 +108,10 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json(newItem);
+    return NextResponse.json({
+      newItem,
+      id: cart.id, // Return the cartId for the client-side to store in localStorage
+    });
   } catch (error: any) {
     console.error('POST Error:', error.message);
     return NextResponse.json(

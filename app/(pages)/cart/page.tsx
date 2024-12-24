@@ -23,7 +23,34 @@ export default function CartPage() {
                 const user = getUserFromLocalStorage();
                 if (!user.id) throw new Error("User ID is missing");
                 const userId = user.id;
-                const cartData = await getCart(userId)
+
+                const cartId = localStorage.getItem("cart_id")
+
+                if(!cartId){
+                    return (
+                        <div className="flex items-center justify-center h-screen w-full">
+                            <div className="text-center max-w-md mx-auto">
+                                <h1 className="text-2xl font-bold">Keranjang Belanja Kosong</h1>
+                                <div className="flex flex-col items-center space-y-4 mt-4">
+                                    <ShoppingCart className="w-24 h-24 text-muted-foreground" />
+                                    <p className="text-center text-muted-foreground">
+                                        Keranjang belanja Anda masih kosong. Mulailah berbelanja untuk menambahkan produk.
+                                    </p>
+                                </div>
+                                <div className="flex justify-center mt-4">
+                                    <Button asChild>
+                                        <Link href="/" className="flex items-center space-x-2">
+                                            <Home className="w-4 h-4" />
+                                            <span>Kembali ke Beranda</span>
+                                        </Link>
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                }
+
+                const cartData = await getCart(userId, cartId)
                 // Ensure cartData is an array before setting it to state
                 if (Array.isArray(cartData.items)) {
                     setCartItems(cartData.items)
