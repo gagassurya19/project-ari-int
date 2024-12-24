@@ -11,6 +11,14 @@ export const getShippingAddresses = async () => {
   return res.json();
 };
 
+export const getShippingAddressesById = async (shippingId: number) => {
+    const res = await fetch(`${API_URL}?shippingId=${shippingId}`);
+    if (!res.ok) {
+      throw new Error('Failed to fetch shipping addresses');
+    }
+    return res.json();
+  };
+
 export const createShippingAddress = async (shippingData: any) => {
   const res = await fetch(API_URL, {
     method: 'POST',

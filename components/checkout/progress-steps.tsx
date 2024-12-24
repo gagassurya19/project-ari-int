@@ -9,7 +9,7 @@ export function ProgressSteps({ currentStep }: ProgressStepsProps) {
   return (
     <div className="flex items-center justify-center gap-4">
       <Link
-        href="/checkout/shipping"
+        href=""
         className={`flex items-center gap-2 ${
           currentStep === 'shipping' ? 'text-[#0A1172]' : 'text-gray-500'
         }`}
@@ -26,7 +26,7 @@ export function ProgressSteps({ currentStep }: ProgressStepsProps) {
       <div className="h-px w-12 bg-gray-300" />
 
       <Link
-        href="/checkout/delivery"
+        href=""
         className={`flex items-center gap-2 ${
           currentStep === 'delivery' ? 'text-[#0A1172]' : 'text-gray-500'
         }`}
@@ -43,7 +43,7 @@ export function ProgressSteps({ currentStep }: ProgressStepsProps) {
       <div className="h-px w-12 bg-gray-300" />
 
       <Link
-        href="/checkout/payment"
+        href=""
         className={`flex items-center gap-2 ${
           currentStep === 'payment' ? 'text-[#0A1172]' : 'text-gray-500'
         }`}

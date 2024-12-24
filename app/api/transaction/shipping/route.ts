@@ -3,8 +3,20 @@ import prisma from '@/lib/prisma';
 
 export async function GET(req: Request) {
   try {
-    const shippings = await prisma.shipping.findMany();
-    return NextResponse.json(shippings);
+    const url = new URL(req.url);
+    const shippingId = url.searchParams.get("shippingId");
+    
+   const shipping = shippingId
+      ? await prisma.shipping.findUnique({
+          where: { id: parseInt(shippingId) },
+        })
+      : await prisma.shipping.findMany();
+
+    if (!shipping) {
+      return NextResponse.json({ error: 'Shipping not found.' }, { status: 404 });
+    }
+
+    return NextResponse.json(shipping);
   } catch (error) {
     console.error('GET Shipping Error:', error);
     return NextResponse.json({ error: 'Failed to fetch shipping addresses.' }, { status: 500 });
