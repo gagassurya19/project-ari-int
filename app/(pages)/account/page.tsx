@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Header } from "@/components/header";
 import { getTransactions } from "@/lib/api/transaction";  
-import { useAuthGuard } from '@/lib/authenticate';
+import { getUserFromLocalStorage, useAuthGuard } from '@/lib/authenticate';
 
 export default function AccountPage() {
   const [userFromStorage, setUserFromStorage] = useState<any | null>(null);
@@ -15,7 +15,7 @@ export default function AccountPage() {
   useEffect(() => {
     // Make sure that localStorage is only accessed in the client-side
     if (typeof window !== "undefined") {
-      const storedUser = localStorage.getItem("user");
+      const storedUser = getUserFromLocalStorage();
       if (storedUser) {
         setUserFromStorage(JSON.parse(storedUser));
       }

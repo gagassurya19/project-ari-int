@@ -7,6 +7,7 @@ import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { getProductDetail } from "@/lib/api/product";
 import { addToCart } from "@/lib/api/cart";
+import { getUserFromLocalStorage } from "@/lib/authenticate";
 
 export default function ProductDetail() {
   const { productId } = useParams(); // Get productId from URL
@@ -15,7 +16,6 @@ export default function ProductDetail() {
   const [quantity, setQuantity] = useState(1);
   const [mainImage, setMainImage] = useState<string | null>(null);
   const [images, setImages] = useState<string[]>([]);
-  const userId = 1; // Replace with dynamic userId if available
 
   useEffect(() => {
     if (productId) {
@@ -44,6 +44,9 @@ export default function ProductDetail() {
 
   const handleAddToCart = async () => {
     try {
+      const user = getUserFromLocalStorage();
+      if (!user.id) throw new Error("User ID is missing");
+      const userId = user.id;
       const response = await addToCart(userId, Number(productId), quantity);
       console.log('Item added to cart:', response);
 

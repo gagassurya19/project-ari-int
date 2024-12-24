@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Header } from "@/components/header"
-import { useAuthGuard } from "@/lib/authenticate"
+import { getUserFromLocalStorage, useAuthGuard } from "@/lib/authenticate"
 import { getCart, updateCartItem, removeFromCart } from "@/lib/api/cart"
 
 export default function CartPage() {
@@ -20,7 +20,9 @@ export default function CartPage() {
     useEffect(() => {
         const fetchCart = async () => {
             try {
-                const userId = 1 // Example userId, replace with the actual logged-in user's ID
+                const user = getUserFromLocalStorage();
+                if (!user.id) throw new Error("User ID is missing");
+                const userId = user.id;
                 const cartData = await getCart(userId)
                 // Ensure cartData is an array before setting it to state
                 if (Array.isArray(cartData.items)) {

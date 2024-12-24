@@ -34,3 +34,11 @@ export function useAuthGuard() {
 
   return { isLoading };
 }
+
+export function getUserFromLocalStorage() {
+  try {
+      return JSON.parse(localStorage.getItem("user") || "{}");
+  } catch {
+      return {}; // Fallback to an empty object
+  }
+}
