@@ -17,7 +17,7 @@ export default function AccountPage() {
     if (typeof window !== "undefined") {
       const storedUser = getUserFromLocalStorage();
       if (storedUser) {
-        setUserFromStorage(JSON.parse(storedUser));
+        setUserFromStorage(storedUser);
       }
     }
   }, []);
