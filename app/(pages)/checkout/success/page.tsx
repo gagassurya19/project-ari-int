@@ -1,27 +1,23 @@
-'use client'
-import { Check } from 'lucide-react'
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { useAuthGuard } from '@/lib/authenticate'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+'use client';
+
+import { Check } from 'lucide-react';
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { useAuthGuard } from '@/lib/authenticate';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import useLocalStorageState from 'use-local-storage-state';
 
 export default function SuccessPage() {
-  const router = useRouter()
-  const [totalCart, setTotalCart] = useState<string | null>(null)
+  const router = useRouter();
+  const [totalCart, setTotalCart] = useLocalStorageState<string | null>("total_cart", { defaultValue: null });
   
   useAuthGuard();
 
-  useEffect(() => {
-    // Only run on the client side (browser)
-    const cartTotal = localStorage.getItem("total_cart");
-    setTotalCart(cartTotal);
-  }, []);
-
   const handleBack = () => {
-    router.push("/")
-    localStorage.removeItem("total_cart")
-  }
+    router.push("/");
+    setTotalCart(null); // Clear the value using the setter function from useLocalStorageState
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">

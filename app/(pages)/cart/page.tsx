@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { ShoppingCart, Home, Minus, Plus } from 'lucide-react'
+import useLocalStorageState from 'use-local-storage-state'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
@@ -11,103 +12,108 @@ import { Header } from "@/components/header"
 import { getUserFromLocalStorage, useAuthGuard } from "@/lib/authenticate"
 import { getCart, updateCartItem, removeFromCart } from "@/lib/api/cart"
 
+interface Product {
+  id: number
+  name: string
+  price: number
+  brand: string
+  image: string
+}
+
+interface CartItem {
+  id: number
+  quantity: number
+  product: Product
+}
+
 export default function CartPage() {
     useAuthGuard()
-    const [cartItems, setCartItems] = useState<any[]>([]);
-    const [loading, setLoading] = useState<boolean>(true)
+    const [cartItems, setCartItems] = useLocalStorageState<CartItem[]>('cart_items', {
+        defaultValue: []
+    })
+    const [loading, setLoading] = useLocalStorageState<boolean>('cart_loading', {
+        defaultValue: true
+    })
 
-    // Fetch cart items when the component mounts
     useEffect(() => {
         const fetchCart = async () => {
             try {
                 const user = getUserFromLocalStorage();
                 if (!user.id) throw new Error("User ID is missing");
-                const userId = user.id;
-
+                
                 const cartId = localStorage.getItem("cart_id")
+                if(!cartId) return;
 
-                if(!cartId){
-                    return (
-                        <div className="flex items-center justify-center h-screen w-full">
-                            <div className="text-center max-w-md mx-auto">
-                                <h1 className="text-2xl font-bold">Keranjang Belanja Kosong</h1>
-                                <div className="flex flex-col items-center space-y-4 mt-4">
-                                    <ShoppingCart className="w-24 h-24 text-muted-foreground" />
-                                    <p className="text-center text-muted-foreground">
-                                        Keranjang belanja Anda masih kosong. Mulailah berbelanja untuk menambahkan produk.
-                                    </p>
-                                </div>
-                                <div className="flex justify-center mt-4">
-                                    <Button asChild>
-                                        <Link href="/" className="flex items-center space-x-2">
-                                            <Home className="w-4 h-4" />
-                                            <span>Kembali ke Beranda</span>
-                                        </Link>
-                                    </Button>
-                                </div>
-                            </div>
-                        </div>
-                    )
-                }
-
-                const cartData = await getCart(userId, cartId)
-                // Ensure cartData is an array before setting it to state
-                if (Array.isArray(cartData.items)) {
-                    setCartItems(cartData.items)
-                } else {
-                    setCartItems([]); // Handle case when data is not an array
-                }
+                const cartData = await getCart(user.id, cartId)
+                setCartItems(Array.isArray(cartData.items) ? cartData.items : [])
             } catch (error) {
                 console.error("Failed to fetch cart:", error)
-                setCartItems([]); // Set empty array on error
+                setCartItems([])
             } finally {
                 setLoading(false)
             }
         }
 
         fetchCart()
-    }, [])
+    }, [setCartItems, setLoading])
 
     const updateQuantity = async (cartItemId: number, increment: number) => {
         try {
-            // Kirim request untuk memperbarui kuantitas item
-            const updatedItem = await updateCartItem(cartItemId, increment);
-
-            // Pastikan response memiliki data yang valid
-            if (updatedItem && updatedItem.id) {
-                // Update state dengan data yang baru
-                setCartItems((items) =>
-                    items.map((item) =>
+            const updatedItem = await updateCartItem(cartItemId, increment)
+            if (updatedItem?.id) {
+                setCartItems((prevItems) =>
+                    prevItems.map(item =>
                         item.id === updatedItem.id
-                            ? { ...item, quantity: updatedItem.quantity } // Mengupdate quantity saja
+                            ? { ...item, quantity: updatedItem.quantity }
                             : item
                     )
-                );
-            } else {
-                console.error("Invalid response for updated item:", updatedItem);
+                )
             }
         } catch (error) {
-            console.error("Failed to update cart item:", error);
+            console.error("Failed to update cart item:", error)
         }
     }
 
     const deleteItem = async (cartItemId: number) => {
         try {
             await removeFromCart(cartItemId)
-            setCartItems(items => items.filter(item => item.id !== cartItemId))
+            setCartItems((prevItems) => prevItems.filter(item => item.id !== cartItemId))
         } catch (error) {
             console.error('Failed to remove item from cart:', error)
         }
     }
 
-    const subtotal = cartItems.length > 0
-        ? cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0)
-        : 0;
-    const shipping = subtotal == 0 ? 0 : 15000
+    const subtotal = cartItems.reduce((sum, item) => 
+        sum + (item.product.price * item.quantity), 0)
+    const shipping = subtotal === 0 ? 0 : 15000
     const total = subtotal + shipping
 
     if (loading) {
         return <div>Loading...</div>
+    }
+
+    if (cartItems.length === 0) {
+        return (
+            <div className="flex items-center justify-center h-screen w-full">
+                <div className="text-center max-w-md mx-auto">
+                    <h1 className="text-2xl font-bold">Keranjang Belanja Kosong</h1>
+                    <div className="flex flex-col items-center space-y-4 mt-4">
+                        <ShoppingCart className="w-24 h-24 text-muted-foreground" />
+                        <p className="text-muted-foreground">
+                            Keranjang belanja Anda masih kosong. Mulailah berbelanja untuk menambahkan produk.
+                        </p>
+                    </div>
+                    <div className="flex justify-center mt-4">
+                        <Button asChild>
+                            <Link href="/" className="flex items-center space-x-2">
+                                <Home className="w-4 h-4" />
+                                <span>Kembali ke Beranda</span>
+                            </Link>
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        )
     }
 
     return (

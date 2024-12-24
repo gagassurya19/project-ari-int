@@ -1,3 +1,5 @@
+'use client'
+
 import { useEffect, useState } from "react"
 import Image from "next/image"
 import { Home, Minus, Plus, ShoppingCart, Trash2 } from "lucide-react"
@@ -8,109 +10,107 @@ import { getUserFromLocalStorage } from "@/lib/authenticate"
 import { getCart, removeFromCart, updateCartItem } from "@/lib/api/cart"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import useLocalStorageState from 'use-local-storage-state';
 
 interface OrderSummaryProps {
-  delivery?: number;  // Optional prop
+  delivery?: number;
 }
 
 export function OrderSummary({ delivery = 0 }: OrderSummaryProps) {
   const route = useRouter()
   const [cartItems, setCartItems] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true)
+  const [user] = useLocalStorageState<{ id: string }>('user', { defaultValue: { id: '' } });
+  const [cartId] = useLocalStorageState<string>('cart_id', { defaultValue: '' });
 
-  // Fetch cart items when the component mounts
   useEffect(() => {
-      const fetchCart = async () => {
-          try {
-              const user = getUserFromLocalStorage();
-              if (!user.id) throw new Error("User ID is missing");
-              const userId = user.id;
-              const cartId = localStorage.getItem("cart_id")
-
-                if(!cartId){
-                    return (
-                        <div className="flex items-center justify-center h-screen w-full">
-                            <div className="text-center max-w-md mx-auto">
-                                <h1 className="text-2xl font-bold">Keranjang Belanja Kosong</h1>
-                                <div className="flex flex-col items-center space-y-4 mt-4">
-                                    <ShoppingCart className="w-24 h-24 text-muted-foreground" />
-                                    <p className="text-center text-muted-foreground">
-                                        Keranjang belanja Anda masih kosong. Mulailah berbelanja untuk menambahkan produk.
-                                    </p>
-                                </div>
-                                <div className="flex justify-center mt-4">
-                                    <Button asChild>
-                                        <Link href="/" className="flex items-center space-x-2">
-                                            <Home className="w-4 h-4" />
-                                            <span>Kembali ke Beranda</span>
-                                        </Link>
-                                    </Button>
-                                </div>
-                            </div>
-                        </div>
-                    )
-                }
-              const cartData = await getCart(userId, cartId)
-              // Ensure cartData is an array before setting it to state
-              if (Array.isArray(cartData.items)) {
-                  setCartItems(cartData.items)
-              } else {
-                  setCartItems([]); // Handle case when data is not an array
-              }
-          } catch (error) {
-              console.error("Failed to fetch cart:", error)
-              setCartItems([]); // Set empty array on error
-          } finally {
-              setLoading(false)
-          }
-      }
-      fetchCart()
-  }, [])
-
-  const updateQuantity = async (cartItemId: number, increment: number) => {
-    try {
-        // Kirim request untuk memperbarui kuantitas item
-        const updatedItem = await updateCartItem(cartItemId, increment);
-
-        // Pastikan response memiliki data yang valid
-        if (updatedItem && updatedItem.id) {
-            // Update state dengan data yang baru
-            setCartItems((items) =>
-                items.map((item) =>
-                    item.id === updatedItem.id
-                        ? { ...item, quantity: updatedItem.quantity } // Mengupdate quantity saja
-                        : item
-                )
-            );
-        } else {
-            console.error("Invalid response for updated item:", updatedItem);
+    const fetchCart = async () => {
+      try {
+        if (!user.id) throw new Error("User ID is missing");
+        if (!cartId) {
+          return (
+            <div className="flex items-center justify-center h-screen w-full">
+              <div className="text-center max-w-md mx-auto">
+                <h1 className="text-2xl font-bold">Keranjang Belanja Kosong</h1>
+                <div className="flex flex-col items-center space-y-4 mt-4">
+                  <ShoppingCart className="w-24 h-24 text-muted-foreground" />
+                  <p className="text-center text-muted-foreground">
+                    Keranjang belanja Anda masih kosong. Mulailah berbelanja untuk menambahkan produk.
+                  </p>
+                </div>
+                <div className="flex justify-center mt-4">
+                  <Button asChild>
+                    <Link href="/" className="flex items-center space-x-2">
+                      <Home className="w-4 h-4" />
+                      <span>Kembali ke Beranda</span>
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )
         }
+
+        const cartData = await getCart(parseInt(user.id), cartId)
+        if (Array.isArray(cartData.items)) {
+          setCartItems(cartData.items)
+        } else {
+          setCartItems([]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch cart:", error)
+        setCartItems([]);
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchCart()
+  }, [user.id, cartId])
+
+
+  const updateQuantity = async (cartItemId: number, newQuantity: number) => {
+    try {
+      const updatedItem = await updateCartItem(cartItemId, newQuantity);
+      if (updatedItem && updatedItem.id) {
+        setCartItems((items) =>
+          items.map((item) =>
+            item.id === updatedItem.id
+              ? { ...item, quantity: updatedItem.quantity }
+              : item
+          )
+        );
+      } else {
+        console.error("Invalid response for updated item:", updatedItem);
+      }
     } catch (error) {
-        console.error("Failed to update cart item:", error);
+      console.error("Failed to update cart item:", error);
     }
   }
-  
+
   const deleteItem = async (cartItemId: number) => {
-      try {
-          await removeFromCart(cartItemId)
-          setCartItems(items => items.filter(item => item.id !== cartItemId))
-      } catch (error) {
-          console.error('Failed to remove item from cart:', error)
-      }
+    try {
+      await removeFromCart(cartItemId)
+      setCartItems(items => items.filter(item => item.id !== cartItemId))
+    } catch (error) {
+      console.error('Failed to remove item from cart:', error)
+    }
   }
-  
+
   const subtotal = cartItems.length > 0
-      ? cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0)
-      : 0;
+    ? cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0)
+    : 0;
   const shipping = subtotal == 0 ? 0 : delivery
   const tax = subtotal == 0 ? 0 : subtotal * 0.065
   const total = subtotal + shipping + tax
-  localStorage.setItem("total_cart", total)
-  
+
+  // Use useLocalStorageState to update total_cart
+  const [, setTotalCart] = useLocalStorageState<number>('total_cart', { defaultValue: 0 });
+  setTotalCart(total);
+
   if (loading) {
-      return <div>Loading...</div>
+    return <div>Loading...</div>
   }
-  
+
   return (
     <div className="space-y-6">
       <h2 className="text-lg font-semibold">Order Summary</h2>

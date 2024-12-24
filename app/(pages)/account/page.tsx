@@ -3,10 +3,11 @@ import { useEffect, useState } from 'react';
 import { Header } from "@/components/header";
 import { getTransactions } from "@/lib/api/transaction";
 import { useAuthGuard } from '@/lib/authenticate';
+import useLocalStorageState from 'use-local-storage-state';
 import { Clock, CreditCard, MapPin, Package, ShoppingBag, User } from 'lucide-react';
 
 export default function AccountPage() {
-  const [userFromStorage, setUserFromStorage] = useState<any | null>(null);
+  const [userFromStorage, setUserFromStorage] = useLocalStorageState<any | null>("user", { defaultValue: null });
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
@@ -14,12 +15,8 @@ export default function AccountPage() {
   useAuthGuard();
 
   useEffect(() => {
-    const user = localStorage.getItem("user") || "";
-    const storedUser = JSON.parse(user);
-    setUserFromStorage(storedUser)
-
-    if (storedUser?.id) {
-      getTransactions(storedUser.id)
+    if (userFromStorage?.id) {
+      getTransactions(userFromStorage.id)
         .then(data => {
           setTransactions(data);
           setLoading(false);
@@ -32,10 +29,10 @@ export default function AccountPage() {
       setError('Tidak ada transaksi');
       setLoading(false);
     }
-  }, [])
+  }, [userFromStorage]);
 
   if (loading) {
-    return <div>Loading...</div>;  // Add a loading state for when userFromStorage is not available yet
+    return <div>Loading...</div>; // Loading state
   }
 
   return (

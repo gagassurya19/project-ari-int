@@ -8,7 +8,13 @@ import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { getProductDetail } from "@/lib/api/product";
 import { createCart, addToCart } from "@/lib/api/cart";
-import { getUserFromLocalStorage } from "@/lib/authenticate";
+import useLocalStorageState from "use-local-storage-state";
+
+// Define a type for the user object
+type User = {
+  id: number;
+  username: string;
+};
 
 export default function ProductDetail() {
   const { productId } = useParams(); // Get productId from URL
@@ -17,6 +23,10 @@ export default function ProductDetail() {
   const [quantity, setQuantity] = useState(1);
   const [mainImage, setMainImage] = useState<string | null>(null);
   const [images, setImages] = useState<string[]>([]);
+
+  // Use useLocalStorageState for user and cart_id
+  const [userFromStorage, setUserFromStorage] = useLocalStorageState<User | null>("user", { defaultValue: null });
+  const [cartId, setCartId] = useLocalStorageState("cart_id", { defaultValue: null });
 
   useEffect(() => {
     if (productId) {
@@ -45,30 +55,25 @@ export default function ProductDetail() {
 
   const handleAddToCart = async () => {
     try {
-      const user = getUserFromLocalStorage();
-      if (!user.id) throw new Error("User ID is missing");
-      const userId = user.id;
-  
-      // Check if cart_id exists in localStorage
-      let cartId = localStorage.getItem("cart_id");
-  
+      if (!userFromStorage?.id) throw new Error("User ID is missing");
+      const userId = userFromStorage?.id;
+
+      // Check if cart_id exists in state
       if (!cartId) {
         // If no cart_id, create a new cart
         const createCartResponse = await createCart(userId, Number(productId), quantity); // Assuming createCart is a function that creates a cart
-        cartId = createCartResponse.id; // Get the cartId from the response
-        localStorage.setItem("cart_id", cartId || ""); // Store cartId in localStorage
+        setCartId(createCartResponse.id); // Set the cartId in localStorageState
       } else {
         // Add the item to the cart using the cartId
-        const response = await addToCart(userId, Number(productId), quantity, parseInt(cartId || "0"));  
+        await addToCart(userId, Number(productId), quantity, cartId);  
       }
-  
+
       // Redirect to cart page after successful addition
       router.push('/cart');
     } catch (error) {
       console.error('Error adding to cart:', error);
     }
   };
-  
 
   if (!product) {
     return <p>Loading...</p>;
