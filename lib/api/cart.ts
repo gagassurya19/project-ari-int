@@ -13,6 +13,13 @@ export const getCart = async (userId: number, cartId?: string) => {
   return res.json();
 };
 
+export const checkCart = async (userId: number, cartId: string) => {
+  const url = `${API_URL}/cartCheck?cartId=${cartId}&userId=${userId}`;
+  const res = await fetch(url);
+  
+  return res.ok;
+};
+
 // Function to create a new cart and add at least one product
 export const createCart = async (userId: number, productId: number, quantity: number) => {
   const res = await fetch(`${API_URL}`, {

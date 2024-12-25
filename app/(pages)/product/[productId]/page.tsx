@@ -7,7 +7,7 @@ import { Minus, Plus, Star } from 'lucide-react';
 import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { getProductDetail } from "@/lib/api/product";
-import { createCart, addToCart } from "@/lib/api/cart";
+import { createCart, addToCart, checkCart } from "@/lib/api/cart";
 import useLocalStorageState from "use-local-storage-state";
 
 // Define a type for the user object
@@ -58,14 +58,21 @@ export default function ProductDetail() {
       if (!userFromStorage?.id) throw new Error("User ID is missing");
       const userId = userFromStorage?.id;
 
+      
       // Check if cart_id exists in state
       if (!cartId) {
         // If no cart_id, create a new cart
         const createCartResponse = await createCart(userId, Number(productId), quantity); // Assuming createCart is a function that creates a cart
         setCartId(createCartResponse.id); // Set the cartId in localStorageState
       } else {
-        // Add the item to the cart using the cartId
-        await addToCart(userId, Number(productId), quantity, cartId);  
+        const cartCheck = await checkCart(userId, cartId)
+        if(!cartCheck){
+          const createCartResponse = await createCart(userId, Number(productId), quantity); // Assuming createCart is a function that creates a cart
+          setCartId(createCartResponse.id); // Set the cartId in localStorageState
+        } else {
+          // Add the item to the cart using the cartId
+          await addToCart(userId, Number(productId), quantity, cartId);  
+        }
       }
 
       // Redirect to cart page after successful addition

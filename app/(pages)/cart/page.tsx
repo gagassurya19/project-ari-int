@@ -10,20 +10,20 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Header } from "@/components/header"
 import { getUserFromLocalStorage, useAuthGuard } from "@/lib/authenticate"
-import { getCart, updateCartItem, removeFromCart } from "@/lib/api/cart"
+import { getCart, updateCartItem, removeFromCart, checkCart } from "@/lib/api/cart"
 
 interface Product {
-  id: number
-  name: string
-  price: number
-  brand: string
-  image: string
+    id: number
+    name: string
+    price: number
+    brand: string
+    image: string
 }
 
 interface CartItem {
-  id: number
-  quantity: number
-  product: Product
+    id: number
+    quantity: number
+    product: Product
 }
 
 export default function CartPage() {
@@ -40,12 +40,19 @@ export default function CartPage() {
             try {
                 const user = getUserFromLocalStorage();
                 if (!user.id) throw new Error("User ID is missing");
-                
-                const cartId = localStorage.getItem("cart_id")
-                if(!cartId) return;
 
-                const cartData = await getCart(user.id, cartId)
-                setCartItems(Array.isArray(cartData.items) ? cartData.items : [])
+                const cartId = localStorage.getItem("cart_id")
+
+                if(cartId) {
+                    const check = await checkCart(user.id, cartId);
+                    if(check){
+                        const cartData = await getCart(user.id, cartId)
+                        setCartItems(Array.isArray(cartData.items) ? cartData.items : [])
+                    }
+                } else {
+                    return
+                }
+
             } catch (error) {
                 console.error("Failed to fetch cart:", error)
                 setCartItems([])
@@ -83,7 +90,7 @@ export default function CartPage() {
         }
     }
 
-    const subtotal = cartItems.reduce((sum, item) => 
+    const subtotal = cartItems.reduce((sum, item) =>
         sum + (item.product.price * item.quantity), 0)
     const shipping = subtotal === 0 ? 0 : 15000
     const total = subtotal + shipping
@@ -94,22 +101,25 @@ export default function CartPage() {
 
     if (cartItems.length === 0) {
         return (
-            <div className="flex items-center justify-center h-screen w-full">
-                <div className="text-center max-w-md mx-auto">
-                    <h1 className="text-2xl font-bold">Keranjang Belanja Kosong</h1>
-                    <div className="flex flex-col items-center space-y-4 mt-4">
-                        <ShoppingCart className="w-24 h-24 text-muted-foreground" />
-                        <p className="text-muted-foreground">
-                            Keranjang belanja Anda masih kosong. Mulailah berbelanja untuk menambahkan produk.
-                        </p>
-                    </div>
-                    <div className="flex justify-center mt-4">
-                        <Button asChild>
-                            <Link href="/" className="flex items-center space-x-2">
-                                <Home className="w-4 h-4" />
-                                <span>Kembali ke Beranda</span>
-                            </Link>
-                        </Button>
+            <div className="min-h-screen bg-white">
+                <Header />
+                <div className="flex items-center justify-center h-screen w-full">
+                    <div className="text-center max-w-md mx-auto">
+                        <h1 className="text-2xl font-bold">Keranjang Belanja Kosong</h1>
+                        <div className="flex flex-col items-center space-y-4 mt-4">
+                            <ShoppingCart className="w-24 h-24 text-muted-foreground" />
+                            <p className="text-muted-foreground">
+                                Keranjang belanja Anda masih kosong. Mulailah berbelanja untuk menambahkan produk.
+                            </p>
+                        </div>
+                        <div className="flex justify-center mt-4">
+                            <Button asChild>
+                                <Link href="/" className="flex items-center space-x-2">
+                                    <Home className="w-4 h-4" />
+                                    <span>Kembali ke Beranda</span>
+                                </Link>
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>
