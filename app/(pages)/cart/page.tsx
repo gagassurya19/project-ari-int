@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator"
 import { Header } from "@/components/header"
 import { getUserFromLocalStorage, useAuthGuard } from "@/lib/authenticate"
 import { getCart, updateCartItem, removeFromCart, checkCart } from "@/lib/api/cart"
+import Loading from "@/components/loading"
 
 interface Product {
     id: number
@@ -96,7 +97,7 @@ export default function CartPage() {
     const total = subtotal + shipping
 
     if (loading) {
-        return <div>Loading...</div>
+        return <Loading />
     }
 
     if (cartItems.length === 0) {

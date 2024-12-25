@@ -64,19 +64,19 @@ export function HeaderWithSearch() {
             {!isLoggedIn ? (
               <>
                 <Link href="/sign-in">
-                  <Button variant="outline" className="border-cream hover:border-cream/90 hover:bg-cream border-2 bg-transparent text-cream font-semibold w-32">
+                  <Button variant="outline" className="border-cream hover:border-cream/90 hover:bg-cream border-2 bg-transparent text-cream font-semibold md:w-32">
                     Login
                   </Button>
                 </Link>
                 <Link href="/sign-up">
-                  <Button className="bg-cream hover:bg-cream/90 text-navy font-semibold w-32">
+                  <Button className="bg-cream hover:bg-cream/90 text-navy font-semibold md:w-32">
                     Sign Up
                   </Button>
                 </Link>
               </>
             ) : (
               <>
-                <p className="text-white">
+                <p className="text-white hidden md:block">
                   Hi, {userFromStorage?.username || 'Guest'}
                 </p>
                 <Link href="/sign-in">
@@ -97,7 +97,7 @@ export function HeaderWithSearch() {
           <div className="flex h-16 items-center justify-between">
             <div></div>
 
-            <div className="flex-1 mx-12 max-w-3xl">
+            <div className="flex-1 mr-7 md:mr-0 md:mx-12 w-full md:max-w-3xl">
               <form onSubmit={handleSearchSubmit} className="relative">
                 <Input
                   type="search"
@@ -114,10 +114,16 @@ export function HeaderWithSearch() {
             </div>
 
             <div className="flex items-center gap-8">
-              <Link href="/cart" className="text-navy hover:text-navy/80">
+              <Link
+                href={isLoggedIn ? "/cart" : "/sign-in"}
+                className="text-navy hover:text-navy/80"
+              >
                 <ShoppingBag className="h-6 w-6" />
               </Link>
-              <Link href="/account" className="text-navy hover:text-navy/80">
+              <Link
+                href={isLoggedIn ? "/account" : "/sign-in"}
+                className="text-navy hover:text-navy/80"
+              >
                 <User className="h-6 w-6" />
               </Link>
             </div>

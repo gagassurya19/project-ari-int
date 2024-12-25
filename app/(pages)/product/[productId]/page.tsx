@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { getProductDetail } from "@/lib/api/product";
 import { createCart, addToCart, checkCart } from "@/lib/api/cart";
 import useLocalStorageState from "use-local-storage-state";
+import Loading from "@/components/loading";
 
 // Define a type for the user object
 type User = {
@@ -55,9 +56,8 @@ export default function ProductDetail() {
 
   const handleAddToCart = async () => {
     try {
-      if (!userFromStorage?.id) throw new Error("User ID is missing");
+      if (!userFromStorage?.id) return router.push('/sign-in');
       const userId = userFromStorage?.id;
-
       
       // Check if cart_id exists in state
       if (!cartId) {
@@ -83,7 +83,7 @@ export default function ProductDetail() {
   };
 
   if (!product) {
-    return <p>Loading...</p>;
+    return <Loading />;
   }
 
   return (

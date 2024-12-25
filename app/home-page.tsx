@@ -6,6 +6,7 @@ import Link from "next/link";
 import { HeaderWithSearch } from "@/components/header-with-search";
 import { getProducts } from "@/lib/api/product";
 import { useSearchParams } from 'next/navigation';
+import Loading from "@/components/loading";
 
 interface Product {
   id: number;
@@ -50,7 +51,7 @@ export default function HomePage() {
   });
 
   if (loading) {
-    return <div className="text-center py-12">Loading...</div>;
+    return <Loading />;
   }
 
   if (error) {

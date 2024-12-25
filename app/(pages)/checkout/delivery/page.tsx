@@ -12,6 +12,7 @@ import { useState, useEffect } from "react";
 import { getDeliveryOptions } from "@/lib/api/delivery";
 import { useRouter } from "next/navigation";
 import useLocalStorageState from 'use-local-storage-state';
+import Loading from "@/components/loading";
 
 export default function DeliveryPage() {
   const router = useRouter();
@@ -60,7 +61,7 @@ export default function DeliveryPage() {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   return (

@@ -32,23 +32,23 @@ export function Header() {
             {!isLoggedIn ? (
               <>
                 <Link href="/sign-in">
-                  <Button variant="outline" className="border-cream hover:border-cream/90 hover:bg-cream border-2 bg-transparent text-cream font-semibold w-32">
+                  <Button variant="outline" className="border-cream hover:border-cream/90 hover:bg-cream border-2 bg-transparent text-cream font-semibold md:w-32">
                     Login
                   </Button>
                 </Link>
                 <Link href="/sign-up">
-                  <Button className="bg-cream hover:bg-cream/90 text-navy font-semibold w-32">
+                  <Button className="bg-cream hover:bg-cream/90 text-navy font-semibold md:w-32">
                     Sign Up
                   </Button>
                 </Link>
               </>
             ) : (
               <>
-                <p className="text-white">
+                <p className="text-white hidden md:block">
                   Hi, {userFromStorage?.username}
                 </p>
                 <Link href="/sign-in">
-                  <Button className="bg-cream hover:bg-cream/90 text-navy font-semibold w-32" onClick={() => {
+                  <Button className="bg-cream hover:bg-cream/90 text-navy font-semibold md:w-32" onClick={() => {
                     deleteToken()
                   }}>
                     Logout

@@ -5,6 +5,7 @@ import { getTransactions } from "@/lib/api/transaction";
 import { useAuthGuard } from '@/lib/authenticate';
 import useLocalStorageState from 'use-local-storage-state';
 import { Clock, CreditCard, MapPin, Package, ShoppingBag, User } from 'lucide-react';
+import Loading from '@/components/loading';
 
 export default function AccountPage() {
   const [userFromStorage, setUserFromStorage] = useLocalStorageState<any | null>("user", { defaultValue: null });
@@ -32,7 +33,7 @@ export default function AccountPage() {
   }, [userFromStorage]);
 
   if (loading) {
-    return <div>Loading...</div>; // Loading state
+    return <Loading/>; // Loading state
   }
 
   return (

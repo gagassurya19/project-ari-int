@@ -11,6 +11,7 @@ import { getCart, removeFromCart, updateCartItem } from "@/lib/api/cart"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import useLocalStorageState from 'use-local-storage-state';
+import Loading from '@/components/loading';
 
 interface OrderSummaryProps {
   delivery?: number;
@@ -108,7 +109,7 @@ export function OrderSummary({ delivery = 0 }: OrderSummaryProps) {
   setTotalCart(total);
 
   if (loading) {
-    return <div>Loading...</div>
+    return <Loading />
   }
 
   return (
