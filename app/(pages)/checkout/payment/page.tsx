@@ -88,6 +88,8 @@ export default function PaymentPage() {
       localStorage.removeItem("shipping_temp");
       localStorage.removeItem("delivery_temp");
       localStorage.removeItem("cart_id");
+      localStorage.removeItem("cart_items");
+      localStorage.removeItem("cart_loading");
   
       // Redirect to success page
       window.location.href = "/checkout/success";
