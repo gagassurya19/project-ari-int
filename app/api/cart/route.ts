@@ -1,31 +1,31 @@
-import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { NextResponse } from 'next/server'; // Mengimpor NextResponse dari Next.js untuk membuat respons HTTP
+import prisma from '@/lib/prisma'; // Mengimpor Prisma client untuk berinteraksi dengan database
 
-// GET: Fetch all cart items for a specific user
+// GET: Mengambil semua item keranjang untuk pengguna tertentu
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const userId = searchParams.get('userId');
-  const cartId = searchParams.get('cartId');
+  const { searchParams } = new URL(req.url); // Mengambil parameter query dari URL
+  const userId = searchParams.get('userId'); // Mendapatkan 'userId' dari parameter query
+  const cartId = searchParams.get('cartId'); // Mendapatkan 'cartId' dari parameter query
 
   if (!userId && !cartId) {
     return NextResponse.json(
       { error: 'userId or cartId is required' },
-      { status: 400 }
+      { status: 400 } // Mengembalikan error jika tidak ada 'userId' atau 'cartId'
     );
   }
 
   try {
-    // Convert cartId to number if it's provided
+    // Menyaring cart berdasarkan cartId atau userId
     const cartFilter: any = cartId
-      ? { id: Number(cartId) }  // Ensure cartId is a number
-      : { userId: Number(userId) };
+      ? { id: Number(cartId) }  // Jika cartId ada, gunakan cartId
+      : { userId: Number(userId) }; // Jika cartId tidak ada, gunakan userId
 
     const cart = await prisma.cart.findFirst({
-      where: cartFilter,
+      where: cartFilter, // Menyaring cart berdasarkan filter
       include: {
         items: {
           include: {
-            product: true,
+            product: true, // Termasuk informasi produk dalam setiap item keranjang
           },
         },
       },
@@ -34,29 +34,29 @@ export async function GET(req: Request) {
     if (!cart) {
       return NextResponse.json(
         { error: 'Cart not found' },
-        { status: 404 }
+        { status: 404 } // Mengembalikan error jika keranjang tidak ditemukan
       );
     }
 
-    return NextResponse.json(cart);
+    return NextResponse.json(cart); // Mengembalikan data keranjang yang ditemukan
   } catch (error: any) {
-    console.error('GET Error:', error.message);
+    console.error('GET Error:', error.message); // Menangani error saat pengambilan data
     return NextResponse.json(
       { error: 'Failed to fetch cart' },
-      { status: 500 }
+      { status: 500 } // Mengembalikan error jika terjadi kesalahan pada server
     );
   }
 }
 
 
-// POST: Add a product to the cart
+// POST: Menambahkan produk ke dalam keranjang
 export async function POST(req: Request) {
-  const { userId, productId, quantity, cartId } = await req.json(); // Accept cartId from the request
+  const { userId, productId, quantity, cartId } = await req.json(); // Mengambil data dari body request
 
   if (!userId || !productId || !quantity) {
     return NextResponse.json(
       { error: 'userId, productId, and quantity are required' },
-      { status: 400 }
+      { status: 400 } // Mengembalikan error jika 'userId', 'productId', atau 'quantity' tidak ada
     );
   }
 
@@ -64,112 +64,112 @@ export async function POST(req: Request) {
     let cart;
 
     if (cartId) {
-      // If cartId is provided, find the cart by cartId
+      // Jika cartId disediakan, cari keranjang berdasarkan cartId
       cart = await prisma.cart.findUnique({
         where: { id: Number(cartId) },
       });
     }
 
-    // Create a new cart if none exists
+    // Jika keranjang tidak ditemukan, buat keranjang baru
     if (!cart) {
       cart = await prisma.cart.create({
         data: {
-          userId: Number(userId),
+          userId: Number(userId), // Menyimpan userId untuk membuat keranjang baru
         },
       });
     }
 
-    // Check if the item already exists in the cart
+    // Periksa apakah item sudah ada dalam keranjang
     const existingItem = await prisma.cartItem.findFirst({
       where: {
         cartId: cart.id,
-        productId: Number(productId),
+        productId: Number(productId), // Menyaring berdasarkan cartId dan productId
       },
     });
 
     if (existingItem) {
-      // Update the quantity if the item exists
+      // Jika item sudah ada, perbarui kuantitasnya
       const updatedItem = await prisma.cartItem.update({
         where: { id: existingItem.id },
         data: {
-          quantity: existingItem.quantity + Number(quantity),
+          quantity: existingItem.quantity + Number(quantity), // Menambahkan kuantitas yang baru
         },
       });
 
-      return NextResponse.json(updatedItem);
+      return NextResponse.json(updatedItem); // Mengembalikan item yang diperbarui
     }
 
-    // Add a new item to the cart if it doesn't exist
+    // Jika item belum ada, tambahkan item baru ke keranjang
     const newItem = await prisma.cartItem.create({
       data: {
         cartId: cart.id,
         productId: Number(productId),
-        quantity: Number(quantity),
+        quantity: Number(quantity), // Menyimpan item baru dengan kuantitas yang ditentukan
       },
     });
 
     return NextResponse.json({
       newItem,
-      id: cart.id, // Return the cartId for the client-side to store in localStorage
+      id: cart.id, // Mengembalikan cartId untuk disimpan di client-side
     });
   } catch (error: any) {
-    console.error('POST Error:', error.message);
+    console.error('POST Error:', error.message); // Menangani error pada proses POST
     return NextResponse.json(
       { error: 'Failed to add item to cart' },
-      { status: 500 }
+      { status: 500 } // Mengembalikan error jika gagal menambahkan item
     );
   }
 }
 
-// PATCH: Update quantity of a cart item
+// PATCH: Memperbarui kuantitas item dalam keranjang
 export async function PATCH(req: Request) {
-  const { cartItemId, quantity } = await req.json();
+  const { cartItemId, quantity } = await req.json(); // Mengambil data yang diperlukan dari body request
 
   if (!cartItemId || !quantity) {
     return NextResponse.json(
       { error: 'cartItemId and quantity are required' },
-      { status: 400 }
+      { status: 400 } // Mengembalikan error jika 'cartItemId' atau 'quantity' tidak ada
     );
   }
 
   try {
     const updatedItem = await prisma.cartItem.update({
-      where: { id: Number(cartItemId) },
-      data: { quantity: Number(quantity) },
+      where: { id: Number(cartItemId) }, // Menyaring berdasarkan cartItemId
+      data: { quantity: Number(quantity) }, // Memperbarui kuantitas item
     });
 
-    return NextResponse.json(updatedItem);
+    return NextResponse.json(updatedItem); // Mengembalikan item yang diperbarui
   } catch (error: any) {
-    console.error('PATCH Error:', error.message);
+    console.error('PATCH Error:', error.message); // Menangani error saat memperbarui item
     return NextResponse.json(
       { error: 'Failed to update cart item' },
-      { status: 500 }
+      { status: 500 } // Mengembalikan error jika gagal memperbarui item
     );
   }
 }
 
-// DELETE: Remove an item from the cart
+// DELETE: Menghapus item dari keranjang
 export async function DELETE(req: Request) {
-  const { cartItemId } = await req.json();
+  const { cartItemId } = await req.json(); // Mengambil cartItemId dari body request
 
   if (!cartItemId) {
     return NextResponse.json(
       { error: 'cartItemId is required' },
-      { status: 400 }
+      { status: 400 } // Mengembalikan error jika 'cartItemId' tidak ada
     );
   }
 
   try {
     await prisma.cartItem.delete({
-      where: { id: Number(cartItemId) },
+      where: { id: Number(cartItemId) }, // Menghapus item berdasarkan cartItemId
     });
 
-    return NextResponse.json({ message: 'Cart item deleted successfully' });
+    return NextResponse.json({ message: 'Cart item deleted successfully' }); // Mengembalikan pesan sukses
   } catch (error: any) {
-    console.error('DELETE Error:', error.message);
+    console.error('DELETE Error:', error.message); // Menangani error saat menghapus item
     return NextResponse.json(
       { error: 'Failed to delete cart item' },
-      { status: 500 }
+      { status: 500 } // Mengembalikan error jika gagal menghapus item
     );
   }
 }

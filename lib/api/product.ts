@@ -1,6 +1,7 @@
 // lib/api/product.ts
 const API_URL = '/api/product';  // Adjust if needed to match your API
 
+// mengambil semua data product dari backend dengan API
 export const getProducts = async () => {
   const res = await fetch(API_URL);
   if (!res.ok) {
@@ -9,6 +10,7 @@ export const getProducts = async () => {
   return res.json();
 };
 
+// mengambil detail dari sebuah product berdasarkan dari ID productnya
 export const getProductDetail = async (productId: number) => {
     const res = await fetch(`${API_URL}?productId=${productId}`);
     if (!res.ok) {
@@ -17,6 +19,7 @@ export const getProductDetail = async (productId: number) => {
     return res.json();
   };
 
+// menambah data product
 export const createProduct = async (productData: any) => {
   const res = await fetch(API_URL, {
     method: 'POST',

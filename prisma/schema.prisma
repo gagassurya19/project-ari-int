@@ -1,114 +1,119 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
+// Mengonfigurasi generator Prisma untuk menggunakan client Prisma dengan provider "prisma-client-js"
 generator client {
   provider = "prisma-client-js"
 }
 
+// Menyambungkan ke sumber data PostgreSQL menggunakan URL yang ada di environment variable "DATABASE_URL"
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
+// Model untuk tabel User
 model User {
-  id        Int        @id @default(autoincrement())
-  username  String     @unique
-  password  String
-  createdAt DateTime   @default(now())
-  carts     Cart[]     // Relation to Cart
-  transactions Transaction[] // Relation to Transaction
+  id        Int        @id @default(autoincrement()) // ID pengguna yang dihasilkan secara otomatis
+  username  String     @unique // Username harus unik
+  password  String     // Password pengguna
+  createdAt DateTime   @default(now()) // Tanggal pembuatan akun, secara otomatis diatur ke waktu saat pembuatan
+  carts     Cart[]     // Relasi dengan tabel Cart (keranjang belanja)
+  transactions Transaction[] // Relasi dengan tabel Transaction (transaksi)
 }
 
+// Model untuk tabel Product (produk)
 model Product {
-  id          Int        @id @default(autoincrement())
-  brand       String
-  name        String
-  price       Decimal
-  rating      Float
-  image       String
-  description String
-  gallery     Gallery[]  // Relation to Gallery
-  cartItems   CartItem[] // Relation to CartItem
-  createdAt   DateTime   @default(now())
+  id          Int        @id @default(autoincrement()) // ID produk yang dihasilkan otomatis
+  brand       String     // Merek produk
+  name        String     // Nama produk
+  price       Decimal    // Harga produk
+  rating      Float      // Rating produk
+  image       String     // URL gambar produk
+  description String     // Deskripsi produk
+  gallery     Gallery[]  // Relasi dengan tabel Gallery (galeri gambar produk)
+  cartItems   CartItem[] // Relasi dengan tabel CartItem (item dalam keranjang)
+  createdAt   DateTime   @default(now()) // Tanggal pembuatan produk
 }
 
+// Model untuk tabel Gallery (galeri gambar produk)
 model Gallery {
-  id        Int      @id @default(autoincrement())
-  imageUrl  String
-  productId Int
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
+  id        Int      @id @default(autoincrement()) // ID gambar galeri
+  imageUrl  String   // URL gambar produk
+  productId Int      // Foreign key ke Product
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade) // Relasi ke Product
+  createdAt DateTime @default(now()) // Tanggal pembuatan galeri
 }
 
+// Model untuk tabel Cart (keranjang belanja)
 model Cart {
-  id         Int        @id @default(autoincrement())
-  userId     Int        // Foreign key to User
-  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  items      CartItem[] // Relation to CartItem
-  transactions Transaction[] // Relation to Transaction
-  createdAt  DateTime   @default(now())
+  id         Int        @id @default(autoincrement()) // ID keranjang yang dihasilkan otomatis
+  userId     Int        // Foreign key ke User
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade) // Relasi ke User
+  items      CartItem[] // Relasi dengan tabel CartItem (item dalam keranjang)
+  transactions Transaction[] // Relasi dengan tabel Transaction (transaksi)
+  createdAt  DateTime   @default(now()) // Tanggal pembuatan keranjang
 }
 
+// Model untuk tabel CartItem (item dalam keranjang)
 model CartItem {
-  id        Int      @id @default(autoincrement())
-  quantity  Int      @default(1)
-  cartId    Int
-  productId Int
-  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
+  id        Int      @id @default(autoincrement()) // ID item keranjang yang dihasilkan otomatis
+  quantity  Int      @default(1) // Jumlah item dalam keranjang, default 1
+  cartId    Int      // Foreign key ke Cart
+  productId Int      // Foreign key ke Product
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade) // Relasi ke Cart
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade) // Relasi ke Product
+  createdAt DateTime @default(now()) // Tanggal pembuatan item dalam keranjang
 }
 
+// Model untuk tabel Transaction (transaksi)
 model Transaction {
-  id               Int           @id @default(autoincrement())
-  userId           Int           // Foreign key to User
-  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  cartId           Int           // Foreign key to Cart
-  cart             Cart          @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  shippingAddress  Shipping      @relation(fields: [shippingId], references: [id])
-  shippingId       Int
-  deliveryOption   Delivery      @relation(fields: [deliveryId], references: [id])
-  deliveryId       Int
-  paymentMethod    Payment       @relation(fields: [paymentId], references: [id])
-  paymentId        Int
-  status           String        @default("Pending") // Pending, Completed, Canceled
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
+  id               Int           @id @default(autoincrement()) // ID transaksi yang dihasilkan otomatis
+  userId           Int           // Foreign key ke User
+  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade) // Relasi ke User
+  cartId           Int           // Foreign key ke Cart
+  cart             Cart          @relation(fields: [cartId], references: [id], onDelete: Cascade) // Relasi ke Cart
+  shippingAddress  Shipping      @relation(fields: [shippingId], references: [id]) // Relasi ke Shipping
+  shippingId       Int           // Foreign key ke Shipping
+  deliveryOption   Delivery      @relation(fields: [deliveryId], references: [id]) // Relasi ke Delivery
+  deliveryId       Int           // Foreign key ke Delivery
+  paymentMethod    Payment       @relation(fields: [paymentId], references: [id]) // Relasi ke Payment
+  paymentId        Int           // Foreign key ke Payment
+  status           String        @default("Pending") // Status transaksi (Pending, Completed, Canceled)
+  createdAt        DateTime      @default(now()) // Tanggal pembuatan transaksi
+  updatedAt        DateTime      @updatedAt // Tanggal pembaruan transaksi
 }
 
+// Model untuk tabel Shipping (alamat pengiriman)
 model Shipping {
-  id             Int           @id @default(autoincrement())
-  firstName      String
-  lastName       String
-  email          String
-  phone          String
-  addressLine1   String
-  addressLine2   String?
-  city           String
-  state          String
-  postalCode     String
-  landmark       String?
-  isBillingSame  Boolean
-  transactions   Transaction[] // Relation to Transaction
+  id             Int           @id @default(autoincrement()) // ID alamat pengiriman yang dihasilkan otomatis
+  firstName      String        // Nama depan penerima
+  lastName       String        // Nama belakang penerima
+  email          String        // Email penerima
+  phone          String        // Nomor telepon penerima
+  addressLine1   String        // Alamat pengiriman baris pertama
+  addressLine2   String?       // Alamat pengiriman baris kedua (opsional)
+  city           String        // Kota penerima
+  state          String        // Provinsi penerima
+  postalCode     String        // Kode pos penerima
+  landmark       String?       // Titik referensi alamat penerima (opsional)
+  isBillingSame  Boolean       // Menunjukkan apakah alamat pengiriman sama dengan alamat penagihan
+  transactions   Transaction[] // Relasi dengan tabel Transaction (transaksi)
 }
 
+// Model untuk tabel Delivery (opsi pengiriman)
 model Delivery {
-  id            Int           @id @default(autoincrement())
-  type          String        // Standard, Express
-  estimatedDays Int
-  cost          Float
-  transactions  Transaction[] // Relation to Transaction
+  id            Int           @id @default(autoincrement()) // ID opsi pengiriman
+  type          String        // Jenis pengiriman (Standard, Express)
+  estimatedDays Int           // Estimasi hari pengiriman
+  cost          Float         // Biaya pengiriman
+  transactions  Transaction[] // Relasi dengan tabel Transaction (transaksi)
 }
 
+// Model untuk tabel Payment (metode pembayaran)
 model Payment {
-  id            Int           @id @default(autoincrement())
-  method        String        // CreditCard, PayPal, etc.
-  cardNumber    String?       // Required only for CreditCard
-  expiry        String?       // MM/YY
-  cvv           String?       // Card verification value
-  status        String        @default("Pending") // Pending, Success, Failed
-  transactions  Transaction[] // Relation to Transaction
+  id            Int           @id @default(autoincrement()) // ID metode pembayaran yang dihasilkan otomatis
+  method        String        // Metode pembayaran (CreditCard, PayPal, dll.)
+  cardNumber    String?       // Nomor kartu (hanya untuk CreditCard)
+  expiry        String?       // Tanggal kedaluwarsa kartu (MM/YY)
+  cvv           String?       // Nilai verifikasi kartu (CVV)
+  status        String        @default("Pending") // Status pembayaran (Pending, Success, Failed)
+  transactions  Transaction[] // Relasi dengan tabel Transaction (transaksi)
 }
